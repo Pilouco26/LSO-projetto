@@ -1,8 +1,5 @@
 # LSO Project - Forza 4 Docker Compose Configuration
 # Multi-client game server architecture
-
-version: '3.8'
-
 services:
   # ==========================================================================
   # C Server - Multi-threaded Forza 4 game server

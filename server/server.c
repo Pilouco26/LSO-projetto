@@ -1329,11 +1329,13 @@ cleanup:
         handle_leave(client);
     }
     
-    // Notify others
-    char leave_msg[BUFFER_SIZE];
-    snprintf(leave_msg, sizeof(leave_msg),
-        "\n[NOTIFICA] %s si è disconnesso.\n\n", client->username);
-    broadcast_except(client->id, leave_msg);
+    // Notify others only if username is set (client completed login)
+    if (client->username[0] != '\0') {
+        char leave_msg[BUFFER_SIZE];
+        snprintf(leave_msg, sizeof(leave_msg),
+            "\n[NOTIFICA] %s si è disconnesso.\n\n", client->username);
+        broadcast_except(client->id, leave_msg);
+    }
     
     // Cleanup client
     pthread_mutex_lock(&clients_mutex);
