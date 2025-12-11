@@ -1,0 +1,55 @@
+# LSO Project - Forza 4 Docker Compose Configuration
+# Multi-client game server architecture
+
+version: '3.8'
+
+services:
+  # ==========================================================================
+  # C Server - Multi-threaded Forza 4 game server
+  # ==========================================================================
+  server:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    container_name: forza4-server
+    hostname: server
+    ports:
+      - "8080:8080"
+    networks:
+      - forza4-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "nc -z localhost 8080 || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  # ==========================================================================
+  # Python Client - Interactive game client
+  # ==========================================================================
+  client:
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+    container_name: forza4-client
+    hostname: client
+    depends_on:
+      server:
+        condition: service_started
+    networks:
+      - forza4-network
+    environment:
+      - SERVER_HOST=server
+      - SERVER_PORT=8080
+      - PYTHONUNBUFFERED=1
+    stdin_open: true    # -i flag for interactive mode
+    tty: true           # -t flag for TTY
+
+# ==========================================================================
+# Network Configuration
+# ==========================================================================
+networks:
+  forza4-network:
+    driver: bridge
+    name: forza4-network

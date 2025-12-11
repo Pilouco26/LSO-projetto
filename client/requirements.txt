@@ -1,0 +1,4 @@
+# Python dependencies for the client
+# Standard library is sufficient for basic socket communication
+# Add additional packages here if needed
+
