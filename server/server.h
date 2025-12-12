@@ -2,6 +2,8 @@
  * LSO Project - Forza 4 (Connect 4) Multi-Client Server
  * 
  * Header file with declarations, constants, and data structures
+ * Miguel Lopes Pereira - m.lopespereira@studenti.unina.it
+ * Oriol Poblet Roca - o.pobletroca@studenti.unina.it
  */
 
 #ifndef SERVER_H
@@ -59,7 +61,7 @@ typedef struct Client {
     int socket;
     char username[MAX_USERNAME];
     int is_connected;
-    int current_game_id;        // Game currently playing (-1 if none)
+    int current_game_id;        
     struct sockaddr_in address;
     pthread_t thread;
 } Client;
@@ -76,13 +78,13 @@ typedef struct Game {
     int id;
     char grid[GRID_ROWS][GRID_COLS];
     GameState state;
-    int creator_id;             // Client ID of creator
-    int opponent_id;            // Client ID of opponent (-1 if none)
-    int current_turn;           // Client ID of whose turn it is
-    int winner_id;              // Client ID of winner (-1 if draw, 0 if ongoing)
-    int is_active;              // Whether game slot is in use
-    JoinRequest *join_requests; // Linked list of join requests
-    pthread_mutex_t game_mutex; // Per-game mutex
+    int creator_id;             
+    int opponent_id;            
+    int current_turn;           
+    int winner_id;              
+    int is_active;              
+    JoinRequest *join_requests; 
+    pthread_mutex_t game_mutex; 
 } Game;
 
 // ============================================================================
