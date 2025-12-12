@@ -19,11 +19,10 @@ import os
 # CONFIGURATION
 # ============================================================================
 
-DEFAULT_HOST = "server"  # Docker service name
+DEFAULT_HOST = "server"
 DEFAULT_PORT = 8080
 BUFFER_SIZE = 4096
 
-# Colors for terminal output (ANSI escape codes)
 class Colors:
     RESET = "\033[0m"
     BOLD = "\033[1m"
@@ -40,7 +39,6 @@ class Colors:
 # ============================================================================
 
 class Forza4Client:
-    """TCP Client for Connect 4 game."""
     
     def __init__(self, host: str, port: int):
         self.host = host
@@ -51,7 +49,6 @@ class Forza4Client:
         self.username = None
         
     def connect(self) -> bool:
-        """Establish connection to the server."""
         try:
             self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             self.socket.connect((self.host, self.port))
@@ -62,7 +59,6 @@ class Forza4Client:
             return False
     
     def disconnect(self):
-        """Close the connection."""
         self.running = False
         self.connected = False
         if self.socket:
@@ -72,7 +68,6 @@ class Forza4Client:
                 pass
     
     def receive_messages(self):
-        """Thread function to receive and display messages from server."""
         while self.running and self.connected:
             try:
                 data = self.socket.recv(BUFFER_SIZE)
@@ -96,8 +91,6 @@ class Forza4Client:
                 break
     
     def display_message(self, message: str):
-        """Format and display server messages with colors."""
-        # Colorize different message types
         if "[ERRORE]" in message:
             message = message.replace("[ERRORE]", f"{Colors.RED}[ERRORE]{Colors.RESET}")
         if "[OK]" in message:
@@ -113,11 +106,9 @@ class Forza4Client:
         if "[STATUS]" in message:
             message = message.replace("[STATUS]", f"{Colors.MAGENTA}[STATUS]{Colors.RESET}")
         
-        # Highlight game pieces
         message = message.replace(" X ", f" {Colors.RED}X{Colors.RESET} ")
         message = message.replace(" O ", f" {Colors.YELLOW}O{Colors.RESET} ")
         
-        # Highlight win/loss
         if "HAI VINTO" in message:
             message = message.replace("HAI VINTO!", f"{Colors.GREEN}HAI VINTO!{Colors.RESET}")
         if "HAI PERSO" in message:
@@ -129,7 +120,6 @@ class Forza4Client:
         sys.stdout.flush()
     
     def send_message(self, message: str) -> bool:
-        """Send a message to the server."""
         if not self.connected:
             print(f"{Colors.RED}[ERRORE] Non connesso al server.{Colors.RESET}")
             return False
@@ -141,7 +131,6 @@ class Forza4Client:
             return False
     
     def show_local_help(self):
-        """Display local client help."""
         help_text = f"""
 {Colors.CYAN}╔═══════════════════════════════════════════════════════════════╗
 ║                    GUIDA RAPIDA CLIENT                         ║
@@ -161,11 +150,9 @@ class Forza4Client:
         print(help_text)
     
     def run_interactive(self):
-        """Run the client in interactive mode."""
         if not self.connect():
             return
         
-        # Start receiver thread
         receiver_thread = threading.Thread(target=self.receive_messages, daemon=True)
         receiver_thread.start()
         
@@ -175,13 +162,11 @@ class Forza4Client:
         try:
             while self.connected and self.running:
                 try:
-                    # Read user input
                     user_input = input()
                     
                     if not self.connected:
                         break
                     
-                    # Handle local commands
                     if user_input.startswith('/'):
                         cmd = user_input[1:].lower().strip()
                         
@@ -197,13 +182,11 @@ class Forza4Client:
                             print(f"{Colors.YELLOW}Comando locale sconosciuto. Usa /help{Colors.RESET}")
                         continue
                     
-                    # Handle quit commands
                     if user_input.lower() in ['quit', 'exit']:
                         self.send_message(user_input)
                         time.sleep(0.3)
                         break
                     
-                    # Send to server
                     if user_input:
                         self.send_message(user_input)
                         
@@ -225,7 +208,6 @@ class Forza4Client:
 # ============================================================================
 
 def wait_for_server(host: str, port: int, max_retries: int = 15, delay: float = 2.0) -> bool:
-    """Wait for server to be available."""
     print(f"{Colors.YELLOW}[CLIENT] Attesa del server {host}:{port}...{Colors.RESET}")
     
     for attempt in range(max_retries):
@@ -245,7 +227,6 @@ def wait_for_server(host: str, port: int, max_retries: int = 15, delay: float = 
 
 
 def print_banner():
-    """Print the client banner."""
     banner = f"""
 {Colors.CYAN}╔═══════════════════════════════════════════════════════════════╗
 ║                                                               ║
@@ -268,21 +249,16 @@ def print_banner():
 # ============================================================================
 
 def main():
-    """Main entry point."""
-    # Get host and port from arguments or environment
     host = sys.argv[1] if len(sys.argv) > 1 else os.environ.get('SERVER_HOST', DEFAULT_HOST)
     port = int(sys.argv[2]) if len(sys.argv) > 2 else int(os.environ.get('SERVER_PORT', DEFAULT_PORT))
     
-    # Print banner
     print_banner()
     
     print(f"{Colors.BLUE}[CLIENT] Host: {host}, Porta: {port}{Colors.RESET}")
     
-    # Wait for server
     if not wait_for_server(host, port):
         sys.exit(1)
     
-    # Create and run client
     client = Forza4Client(host, port)
     client.run_interactive()
 

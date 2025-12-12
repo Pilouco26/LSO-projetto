@@ -2,6 +2,9 @@
  * LSO Project - Forza 4 (Connect 4) Multi-Client Server
  * 
  * Implementation of all server functions except main
+ * 
+ * Miguel Lopes - m.lopespereira@studenti.unina.it
+ * Oriol Poblet - o.pobletroca@studenti.unina.it
  */
 
 #include "server.h"
@@ -166,13 +169,9 @@ int check_direction(Game *game, int row, int col, int dr, int dc, char piece) {
 int check_winner(Game *game, char piece) {
     for (int r = 0; r < GRID_ROWS; r++) {
         for (int c = 0; c < GRID_COLS; c++) {
-            // Horizontal
             if (check_direction(game, r, c, 0, 1, piece)) return 1;
-            // Vertical
             if (check_direction(game, r, c, 1, 0, piece)) return 1;
-            // Diagonal down-right
             if (check_direction(game, r, c, 1, 1, piece)) return 1;
-            // Diagonal down-left
             if (check_direction(game, r, c, 1, -1, piece)) return 1;
         }
     }
@@ -198,8 +197,6 @@ int is_grid_full(Game *game) {
  */
 int create_game(int creator_id) {
     pthread_mutex_lock(&games_mutex);
-    
-    // Find free slot
     int game_id = -1;
     for (int i = 0; i < MAX_GAMES; i++) {
         if (!games[i].is_active) {
@@ -210,12 +207,12 @@ int create_game(int creator_id) {
     
     if (game_id == -1) {
         pthread_mutex_unlock(&games_mutex);
-        return -1; // No free slots
+        return -1;
     }
     
     Game *game = &games[game_id];
     game->id = game_id;
-    game->state = GAME_WAITING;  // Immediately in waiting state
+    game->state = GAME_WAITING;
     game->creator_id = creator_id;
     game->opponent_id = -1;
     game->current_turn = creator_id;
@@ -229,7 +226,6 @@ int create_game(int creator_id) {
     
     pthread_mutex_unlock(&games_mutex);
     
-    // Update creator's current game
     pthread_mutex_lock(&clients_mutex);
     Client *creator = get_client_by_id(creator_id);
     if (creator) {
@@ -260,25 +256,23 @@ int add_join_request(int game_id, int requester_id) {
     
     if (game->state != GAME_WAITING) {
         pthread_mutex_unlock(&game->game_mutex);
-        return -2; // Game not in waiting state
+        return -2;
     }
     
     if (game->creator_id == requester_id) {
         pthread_mutex_unlock(&game->game_mutex);
-        return -3; // Can't join your own game
+        return -3;
     }
     
-    // Check if already requested
     JoinRequest *req = game->join_requests;
     while (req) {
         if (req->requester_id == requester_id && req->processed == 0) {
             pthread_mutex_unlock(&game->game_mutex);
-            return -4; // Already requested
+            return -4;
         }
         req = req->next;
     }
     
-    // Add new request
     JoinRequest *new_req = malloc(sizeof(JoinRequest));
     new_req->requester_id = requester_id;
     new_req->processed = 0;
@@ -303,7 +297,6 @@ int process_join_request(int game_id, int requester_id, int accept) {
         return -2;
     }
     
-    // Find the request
     JoinRequest *req = game->join_requests;
     while (req) {
         if (req->requester_id == requester_id && req->processed == 0) {
@@ -312,9 +305,8 @@ int process_join_request(int game_id, int requester_id, int accept) {
             if (accept) {
                 game->opponent_id = requester_id;
                 game->state = GAME_IN_PROGRESS;
-                game->current_turn = game->creator_id; // Creator goes first
+                game->current_turn = game->creator_id;
                 
-                // Update opponent's current game
                 pthread_mutex_lock(&clients_mutex);
                 Client *opponent = get_client_by_id(requester_id);
                 if (opponent) {
@@ -330,7 +322,7 @@ int process_join_request(int game_id, int requester_id, int accept) {
     }
     
     pthread_mutex_unlock(&game->game_mutex);
-    return -3; // Request not found
+    return -3;
 }
 
 /**
@@ -344,12 +336,12 @@ int make_move(int game_id, int player_id, int column) {
     
     if (game->state != GAME_IN_PROGRESS) {
         pthread_mutex_unlock(&game->game_mutex);
-        return -2; // Game not in progress
+        return -2;
     }
     
     if (game->current_turn != player_id) {
         pthread_mutex_unlock(&game->game_mutex);
-        return -3; // Not your turn
+        return -3;
     }
     
     char piece = (player_id == game->creator_id) ? PLAYER1 : PLAYER2;
@@ -357,20 +349,17 @@ int make_move(int game_id, int player_id, int column) {
     
     if (row < 0) {
         pthread_mutex_unlock(&game->game_mutex);
-        return -4; // Invalid move (column full)
+        return -4;
     }
     
-    // Check for winner
     if (check_winner(game, piece)) {
         game->winner_id = player_id;
         game->state = GAME_FINISHED;
     } else if (is_grid_full(game)) {
-        game->winner_id = -1; // Draw
+        game->winner_id = -1;
         game->state = GAME_FINISHED;
     } else {
-        // Switch turn
-        game->current_turn = (player_id == game->creator_id) ? 
-                             game->opponent_id : game->creator_id;
+        game->current_turn = (player_id == game->creator_id) ? game->opponent_id : game->creator_id;
     }
     
     pthread_mutex_unlock(&game->game_mutex);
@@ -386,7 +375,6 @@ void cleanup_game(int game_id) {
     
     pthread_mutex_lock(&game->game_mutex);
     
-    // Free join requests
     JoinRequest *req = game->join_requests;
     while (req) {
         JoinRequest *next = req->next;
@@ -395,7 +383,6 @@ void cleanup_game(int game_id) {
     }
     game->join_requests = NULL;
     
-    // Clear player references
     pthread_mutex_lock(&clients_mutex);
     for (int i = 0; i < MAX_CLIENTS; i++) {
         if (clients[i].current_game_id == game_id) {
@@ -422,9 +409,7 @@ void reset_game_for_rematch(int game_id) {
     init_grid(game);
     game->state = GAME_IN_PROGRESS;
     game->winner_id = 0;
-    // Swap who goes first
-    game->current_turn = (game->current_turn == game->creator_id) ? 
-                         game->opponent_id : game->creator_id;
+    game->current_turn = (game->current_turn == game->creator_id) ? game->opponent_id : game->creator_id;
     
     pthread_mutex_unlock(&game->game_mutex);
 }
@@ -524,8 +509,7 @@ void handle_status(Client *client) {
             switch (game->state) {
                 case GAME_WAITING: state_str = "Waiting for opponent"; break;
                 case GAME_IN_PROGRESS: 
-                    state_str = (game->current_turn == client->id) ? 
-                               "In progress - IT'S YOUR TURN!" : "In progress - Opponent's turn";
+                    state_str = (game->current_turn == client->id) ? "In progress - IT'S YOUR TURN!" : "In progress - Opponent's turn";
                     break;
                 case GAME_FINISHED: state_str = "Finished"; break;
                 default: state_str = "Created"; break;
@@ -547,8 +531,6 @@ void handle_status(Client *client) {
 
 void handle_create(Client *client) {
     char msg[BUFFER_SIZE];
-    
-    // Check if already in a game
     if (client->current_game_id >= 0) {
         Game *current = get_game_by_id(client->current_game_id);
         if (current && current->state != GAME_FINISHED) {
@@ -579,7 +561,6 @@ void handle_create(Client *client) {
             "╚═══════════════════════════════════════════════════════════════╝\n\n",
             game_id, game_id);
         
-        // Notify other players
         char broadcast_msg[BUFFER_SIZE];
         snprintf(broadcast_msg, sizeof(broadcast_msg),
             "\n[NOTICE] %s created game #%d. Use 'join %d' to participate!\n\n",
@@ -592,8 +573,6 @@ void handle_create(Client *client) {
 
 void handle_join(Client *client, int game_id) {
     char msg[BUFFER_SIZE];
-    
-    // Check if already in a game
     if (client->current_game_id >= 0) {
         Game *current = get_game_by_id(client->current_game_id);
         if (current && current->state != GAME_FINISHED) {
@@ -614,7 +593,6 @@ void handle_join(Client *client, int game_id) {
                 "     Waiting for the creator to accept your request...\n\n",
                 game_id);
             
-            // Notify creator
             Game *game = get_game_by_id(game_id);
             if (game) {
                 char notify[BUFFER_SIZE];
@@ -725,7 +703,6 @@ void handle_accept_reject(Client *client, const char *username, int accept) {
         return;
     }
     
-    // Find requester by username
     int requester_id = -1;
     pthread_mutex_lock(&clients_mutex);
     for (int i = 0; i < MAX_CLIENTS; i++) {
@@ -747,7 +724,6 @@ void handle_accept_reject(Client *client, const char *username, int accept) {
     
     if (result == 0) {
         if (accept) {
-            // Notify both players and start game
             snprintf(msg, sizeof(msg),
                 "\n╔═══════════════════════════════════════════════════════════════╗\n"
                 "║                    THE GAME BEGINS!                            ║\n"
@@ -759,12 +735,10 @@ void handle_accept_reject(Client *client, const char *username, int accept) {
                 username);
             send(client->socket, msg, strlen(msg), 0);
             
-            // Send grid to creator
             char grid_msg[BUFFER_SIZE];
             format_grid(game, grid_msg, sizeof(grid_msg));
             send(client->socket, grid_msg, strlen(grid_msg), 0);
             
-            // Notify opponent
             char opponent_msg[BUFFER_SIZE];
             snprintf(opponent_msg, sizeof(opponent_msg),
                 "\n╔═══════════════════════════════════════════════════════════════╗\n"
@@ -778,14 +752,11 @@ void handle_accept_reject(Client *client, const char *username, int accept) {
             send_to_client(requester_id, opponent_msg);
             send_to_client(requester_id, grid_msg);
             
-            // Notify others that game started
             char broadcast_msg[BUFFER_SIZE];
             snprintf(broadcast_msg, sizeof(broadcast_msg),
                 "\n[NOTICE] Game #%d between %s and %s has started!\n\n",
                 client->current_game_id, client->username, username);
             broadcast_except(client->id, broadcast_msg);
-            // Don't double-notify the opponent
-            
         } else {
             snprintf(msg, sizeof(msg),
                 "\n[OK] You rejected %s's request.\n\n", username);
@@ -822,24 +793,18 @@ void handle_move(Client *client, int column) {
         return;
     }
     
-    // Convert to 0-based index
     int col = column - 1;
-    
     int result = make_move(client->current_game_id, client->id, col);
     
     switch (result) {
         case 0: {
-            // Move successful
             char grid_msg[BUFFER_SIZE];
             format_grid(game, grid_msg, sizeof(grid_msg));
             
-            int opponent_id = (client->id == game->creator_id) ? 
-                             game->opponent_id : game->creator_id;
+            int opponent_id = (client->id == game->creator_id) ? game->opponent_id : game->creator_id;
             
             if (game->state == GAME_FINISHED) {
-                // Game over
                 if (game->winner_id == client->id) {
-                    // Current player won
                     snprintf(msg, sizeof(msg),
                         "%s\n"
                         "╔═══════════════════════════════════════════════════════════════╗\n"
@@ -863,7 +828,6 @@ void handle_move(Client *client, int column) {
                     send_to_client(opponent_id, msg);
                     
                 } else if (game->winner_id == -1) {
-                    // Draw
                     snprintf(msg, sizeof(msg),
                         "%s\n"
                         "╔═══════════════════════════════════════════════════════════════╗\n"
@@ -877,7 +841,6 @@ void handle_move(Client *client, int column) {
                     send_to_client(opponent_id, msg);
                 }
                 
-                // Notify others
                 const char *opponent_name = get_username(opponent_id);
                 char broadcast_msg[BUFFER_SIZE];
                 if (game->winner_id == -1) {
@@ -892,7 +855,6 @@ void handle_move(Client *client, int column) {
                 broadcast_except(client->id, broadcast_msg);
                 
             } else {
-                // Game continues
                 snprintf(msg, sizeof(msg),
                     "%s\n[OK] Move made in column %d. Wait for opponent's turn...\n\n",
                     grid_msg, column);
@@ -985,9 +947,7 @@ void handle_leave(Client *client) {
     pthread_mutex_lock(&game->game_mutex);
     
     if (game->state == GAME_IN_PROGRESS) {
-        // Opponent wins by forfeit
-        opponent_id = (client->id == game->creator_id) ? 
-                     game->opponent_id : game->creator_id;
+        opponent_id = (client->id == game->creator_id) ? game->opponent_id : game->creator_id;
         game->winner_id = opponent_id;
         game->state = GAME_FINISHED;
     }
@@ -1011,7 +971,6 @@ void handle_leave(Client *client) {
             client->username);
         send_to_client(opponent_id, msg);
         
-        // Notify others
         char broadcast_msg[BUFFER_SIZE];
         snprintf(broadcast_msg, sizeof(broadcast_msg),
             "\n[NOTICE] Game #%d is over. %s left.\n\n",
@@ -1019,7 +978,6 @@ void handle_leave(Client *client) {
         broadcast_except(client->id, broadcast_msg);
     }
     
-    // Cleanup if game is finished or waiting
     if (game->state == GAME_FINISHED || game->state == GAME_WAITING) {
         cleanup_game(game_id);
     }
@@ -1043,10 +1001,8 @@ void handle_rematch(Client *client) {
         return;
     }
     
-    int opponent_id = (client->id == game->creator_id) ? 
-                     game->opponent_id : game->creator_id;
+    int opponent_id = (client->id == game->creator_id) ? game->opponent_id : game->creator_id;
     
-    // Reset game for rematch
     reset_game_for_rematch(client->current_game_id);
     
     const char *first_player = get_username(game->current_turn);
@@ -1080,7 +1036,6 @@ void handle_rematch(Client *client) {
     send_to_client(opponent_id, msg);
     send_to_client(opponent_id, grid_msg);
     
-    // Notify others
     char broadcast_msg[BUFFER_SIZE];
     snprintf(broadcast_msg, sizeof(broadcast_msg),
         "\n[NOTICE] Rematch started in game #%d!\n\n",
@@ -1102,7 +1057,6 @@ void *handle_client(void *arg) {
            inet_ntoa(client->address.sin_addr),
            ntohs(client->address.sin_port));
     
-    // Request username
     char welcome[] = 
         "\n╔═══════════════════════════════════════════════════════════════╗\n"
         "║           WELCOME TO CONNECT 4 SERVER!                         ║\n"
@@ -1112,7 +1066,6 @@ void *handle_client(void *arg) {
         "Username: ";
     send(client->socket, welcome, strlen(welcome), 0);
     
-    // Read username
     bytes_read = recv(client->socket, buffer, MAX_USERNAME - 1, 0);
     if (bytes_read <= 0) {
         printf("[SERVER] Client #%d disconnected during login\n", client->id);
@@ -1120,7 +1073,6 @@ void *handle_client(void *arg) {
     }
     
     buffer[bytes_read] = '\0';
-    // Remove newlines
     char *newline = strchr(buffer, '\n');
     if (newline) *newline = '\0';
     newline = strchr(buffer, '\r');
@@ -1131,49 +1083,41 @@ void *handle_client(void *arg) {
     
     printf("[SERVER] Client #%d registered as '%s'\n", client->id, client->username);
     
-    // Send confirmation
     char confirm_msg[BUFFER_SIZE];
     snprintf(confirm_msg, sizeof(confirm_msg),
         "\n[OK] Welcome %s! Type 'help' to see available commands.\n\n",
         client->username);
     send(client->socket, confirm_msg, strlen(confirm_msg), 0);
     
-    // Notify others
     char join_msg[BUFFER_SIZE];
     snprintf(join_msg, sizeof(join_msg),
         "\n[NOTICE] %s connected to the server.\n\n", client->username);
     broadcast_except(client->id, join_msg);
     
-    // Main command loop
     while (server_running && (bytes_read = recv(client->socket, buffer, BUFFER_SIZE - 1, 0)) > 0) {
         buffer[bytes_read] = '\0';
         
-        // Remove newlines
         newline = strchr(buffer, '\n');
         if (newline) *newline = '\0';
         newline = strchr(buffer, '\r');
         if (newline) *newline = '\0';
         
-        // Skip empty commands
         if (strlen(buffer) == 0) continue;
         
         printf("[SERVER] %s: %s\n", client->username, buffer);
         
-        // Parse command
         char cmd[64];
         char arg[64];
         int num_arg;
         
         if (sscanf(buffer, "%63s %63s", cmd, arg) < 1) continue;
         
-        // Convert command to lowercase
         for (int i = 0; cmd[i]; i++) {
             if (cmd[i] >= 'A' && cmd[i] <= 'Z') {
                 cmd[i] = cmd[i] + 32;
             }
         }
         
-        // Handle commands
         if (strcmp(cmd, "help") == 0) {
             handle_help(client);
         }
@@ -1239,15 +1183,12 @@ void *handle_client(void *arg) {
     }
     
 cleanup:
-    // Handle disconnect
     printf("[SERVER] Client '%s' (#%d) disconnected\n", client->username, client->id);
     
-    // Leave current game if any
     if (client->current_game_id >= 0) {
         handle_leave(client);
     }
     
-    // Notify others only if username is set (client completed login)
     if (client->username[0] != '\0') {
         char leave_msg[BUFFER_SIZE];
         snprintf(leave_msg, sizeof(leave_msg),
@@ -1255,7 +1196,6 @@ cleanup:
         broadcast_except(client->id, leave_msg);
     }
     
-    // Cleanup client
     pthread_mutex_lock(&clients_mutex);
     close(client->socket);
     client->is_connected = 0;
@@ -1277,5 +1217,3 @@ void handle_signal(int sig) {
     }
     exit(0);
 }
-
-
