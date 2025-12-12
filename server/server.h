@@ -19,6 +19,12 @@
 #include <signal.h>
 #include <errno.h>
 #include <time.h>
+#include "include/server_utils.h"
+#include "include/server_game_logic.h"
+#include "include/server_game_management.h"
+#include "include/server_handlers.h"
+
+#endif
 
 // ============================================================================
 // CONSTANTS
@@ -34,18 +40,19 @@
 #define GRID_ROWS 6
 #define GRID_COLS 7
 
-// Game states
-typedef enum {
-    GAME_CREATED,       // Just created, not yet waiting
-    GAME_WAITING,       // Waiting for opponent
-    GAME_IN_PROGRESS,   // Game is being played
-    GAME_FINISHED       // Game has ended
-} GameState;
-
 // Player symbols
 #define EMPTY '.'
 #define PLAYER1 'X'
 #define PLAYER2 'O'
+// Game states
+typedef enum {
+    GAME_CREATED,       
+    GAME_WAITING,       
+    GAME_IN_PROGRESS,   
+    GAME_FINISHED       
+} GameState;
+
+
 
 // ============================================================================
 // DATA STRUCTURES
@@ -69,7 +76,7 @@ typedef struct Client {
 // Join request structure
 typedef struct JoinRequest {
     int requester_id;
-    int processed;              // 0 = pending, 1 = accepted, -1 = rejected
+    int processed;              
     struct JoinRequest *next;
 } JoinRequest;
 
@@ -88,7 +95,7 @@ typedef struct Game {
 } Game;
 
 // ============================================================================
-// GLOBAL VARIABLES (extern declarations)
+// GLOBAL VARIABLES
 // ============================================================================
 
 extern int server_socket;
@@ -100,15 +107,4 @@ extern int game_count;
 extern pthread_mutex_t games_mutex;
 extern volatile int server_running;
 
-// ============================================================================
-// FUNCTION DECLARATIONS
-// ============================================================================
-// Include function declarations from separate header files
-// (included after typedefs so Client and Game types are available)
-#include "include/server_utils.h"
-#include "include/server_game_logic.h"
-#include "include/server_game_management.h"
-#include "include/server_handlers.h"
-
-#endif // SERVER_H
 

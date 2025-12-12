@@ -8,9 +8,6 @@
 
 #ifndef SERVER_GAME_MANAGEMENT_H
 #define SERVER_GAME_MANAGEMENT_H
-
-// This header should be included after server.h where Game is defined
-// Forward declaration for Game type
 struct Game;
 
 // ============================================================================
@@ -25,5 +22,5 @@ int make_move(int game_id, int player_id, int column);
 void cleanup_game(int game_id);
 void reset_game_for_rematch(int game_id);
 
-#endif // SERVER_GAME_MANAGEMENT_H
+#endif 
 

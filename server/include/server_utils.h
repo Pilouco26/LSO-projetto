@@ -8,9 +8,6 @@
 
 #ifndef SERVER_UTILS_H
 #define SERVER_UTILS_H
-
-// This header should be included after server.h where Client is defined
-// Forward declaration for Client type
 struct Client;
 
 // ============================================================================
@@ -23,5 +20,5 @@ void broadcast_all(const char *message);
 Client* get_client_by_id(int client_id);
 const char* get_username(int client_id);
 
-#endif // SERVER_UTILS_H
+#endif
 

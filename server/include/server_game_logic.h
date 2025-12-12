@@ -8,9 +8,6 @@
 
 #ifndef SERVER_GAME_LOGIC_H
 #define SERVER_GAME_LOGIC_H
-
-// This header should be included after server.h where Game is defined
-// Forward declaration for Game type
 struct Game;
 
 // ============================================================================
@@ -24,5 +21,5 @@ int check_direction(Game *game, int row, int col, int dr, int dc, char piece);
 int check_winner(Game *game, char piece);
 int is_grid_full(Game *game);
 
-#endif // SERVER_GAME_LOGIC_H
+#endif 
 

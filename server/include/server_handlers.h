@@ -8,9 +8,6 @@
 
 #ifndef SERVER_HANDLERS_H
 #define SERVER_HANDLERS_H
-
-// This header should be included after server.h where Client is defined
-// Forward declaration for Client type
 struct Client;
 
 // ============================================================================
@@ -36,5 +33,5 @@ void handle_rematch(Client *client);
 void *handle_client(void *arg);
 void handle_signal(int sig);
 
-#endif // SERVER_HANDLERS_H
+#endif
 
