@@ -10,9 +10,6 @@
 #define SERVER_GAME_MANAGEMENT_H
 struct Game;
 
-// ============================================================================
-// GAME MANAGEMENT
-// ============================================================================
 
 int create_game(int creator_id);
 Game* get_game_by_id(int game_id);

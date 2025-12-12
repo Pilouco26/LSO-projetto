@@ -8,26 +8,21 @@
 
 #include "server.h"
 
-// ============================================================================
-// GLOBAL VARIABLES
-// ============================================================================
-
-// Server socket
 int server_socket = -1;
-
-// Client management
 Client clients[MAX_CLIENTS];
 int client_count = 0;
 pthread_mutex_t clients_mutex = PTHREAD_MUTEX_INITIALIZER;
 
-// Game management
 Game games[MAX_GAMES];
 int game_count = 0;
 pthread_mutex_t games_mutex = PTHREAD_MUTEX_INITIALIZER;
 
-// Running flag
 volatile int server_running = 1;
 
+
+// ============================================================================
+// GAME
+// ============================================================================
 int main(int argc, char *argv[]) {
     struct sockaddr_in server_addr, client_addr;
     socklen_t client_len = sizeof(client_addr);
@@ -125,7 +120,7 @@ int main(int argc, char *argv[]) {
         strcpy(clients[slot].username, "");
         
         pthread_mutex_unlock(&clients_mutex);
-                    
+
         if (pthread_create(&clients[slot].thread, NULL, handle_client, &clients[slot]) != 0) {
             perror("[SERVER] Thread creation error");
             pthread_mutex_lock(&clients_mutex);

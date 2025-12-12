@@ -10,9 +10,6 @@
 #define SERVER_UTILS_H
 struct Client;
 
-// ============================================================================
-// UTILITY FUNCTIONS
-// ============================================================================
 
 void send_to_client(int client_id, const char *message);
 void broadcast_except(int exclude_id, const char *message);

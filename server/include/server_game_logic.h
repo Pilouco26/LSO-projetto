@@ -10,10 +10,6 @@
 #define SERVER_GAME_LOGIC_H
 struct Game;
 
-// ============================================================================
-// CONNECT 4 GAME LOGIC
-// ============================================================================
-
 void init_grid(Game *game);
 void format_grid(Game *game, char *buffer, size_t size);
 int drop_piece(Game *game, int col, char piece);

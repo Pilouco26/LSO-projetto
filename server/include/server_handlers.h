@@ -10,9 +10,6 @@
 #define SERVER_HANDLERS_H
 struct Client;
 
-// ============================================================================
-// COMMAND HANDLERS
-// ============================================================================
 
 void handle_help(Client *client);
 void handle_list(Client *client);
@@ -25,11 +22,6 @@ void handle_move(Client *client, int column);
 void handle_grid(Client *client);
 void handle_leave(Client *client);
 void handle_rematch(Client *client);
-
-// ============================================================================
-// CLIENT AND SIGNAL HANDLERS
-// ============================================================================
-
 void *handle_client(void *arg);
 void handle_signal(int sig);
 
