@@ -103,49 +103,12 @@ extern volatile int server_running;
 // ============================================================================
 // FUNCTION DECLARATIONS
 // ============================================================================
-
-// Utility functions
-void send_to_client(int client_id, const char *message);
-void broadcast_except(int exclude_id, const char *message);
-void broadcast_all(const char *message);
-Client* get_client_by_id(int client_id);
-const char* get_username(int client_id);
-
-// Connect 4 game logic
-void init_grid(Game *game);
-void format_grid(Game *game, char *buffer, size_t size);
-int drop_piece(Game *game, int col, char piece);
-int check_direction(Game *game, int row, int col, int dr, int dc, char piece);
-int check_winner(Game *game, char piece);
-int is_grid_full(Game *game);
-
-// Game management
-int create_game(int creator_id);
-Game* get_game_by_id(int game_id);
-int add_join_request(int game_id, int requester_id);
-int process_join_request(int game_id, int requester_id, int accept);
-int make_move(int game_id, int player_id, int column);
-void cleanup_game(int game_id);
-void reset_game_for_rematch(int game_id);
-
-// Command handlers
-void handle_help(Client *client);
-void handle_list(Client *client);
-void handle_status(Client *client);
-void handle_create(Client *client);
-void handle_join(Client *client, int game_id);
-void handle_requests(Client *client);
-void handle_accept_reject(Client *client, const char *username, int accept);
-void handle_move(Client *client, int column);
-void handle_grid(Client *client);
-void handle_leave(Client *client);
-void handle_rematch(Client *client);
-
-// Client handler
-void *handle_client(void *arg);
-
-// Signal handler
-void handle_signal(int sig);
+// Include function declarations from separate header files
+// (included after typedefs so Client and Game types are available)
+#include "include/server_utils.h"
+#include "include/server_game_logic.h"
+#include "include/server_game_management.h"
+#include "include/server_handlers.h"
 
 #endif // SERVER_H
 
