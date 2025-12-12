@@ -1,91 +1,10 @@
 /**
  * LSO Project - Forza 4 (Connect 4) Multi-Client Server
  * 
- * A multi-threaded server for playing Connect 4.
- * Features:
- * - Multiple concurrent games
- * - Game states: CREATED -> WAITING -> IN_PROGRESS -> FINISHED
- * - Thread-safe operations with mutex synchronization
- * - Player notifications and game management
+ * Implementation of all server functions except main
  */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
-#include <arpa/inet.h>
-#include <sys/socket.h>
-#include <pthread.h>
-#include <signal.h>
-#include <errno.h>
-#include <time.h>
-
-// ============================================================================
-// CONSTANTS
-// ============================================================================
-
-#define PORT 8080
-#define BUFFER_SIZE 4096
-#define MAX_CLIENTS 100
-#define MAX_GAMES 50
-#define MAX_USERNAME 32
-
-// Connect 4 grid dimensions
-#define GRID_ROWS 6
-#define GRID_COLS 7
-
-// Game states
-typedef enum {
-    GAME_CREATED,       // Just created, not yet waiting
-    GAME_WAITING,       // Waiting for opponent
-    GAME_IN_PROGRESS,   // Game is being played
-    GAME_FINISHED       // Game has ended
-} GameState;
-
-// Player symbols
-#define EMPTY '.'
-#define PLAYER1 'X'
-#define PLAYER2 'O'
-
-// ============================================================================
-// DATA STRUCTURES
-// ============================================================================
-
-// Forward declarations
-struct Game;
-struct Client;
-
-// Client structure
-typedef struct Client {
-    int id;
-    int socket;
-    char username[MAX_USERNAME];
-    int is_connected;
-    int current_game_id;        // Game currently playing (-1 if none)
-    struct sockaddr_in address;
-    pthread_t thread;
-} Client;
-
-// Join request structure
-typedef struct JoinRequest {
-    int requester_id;
-    int processed;              // 0 = pending, 1 = accepted, -1 = rejected
-    struct JoinRequest *next;
-} JoinRequest;
-
-// Game structure
-typedef struct Game {
-    int id;
-    char grid[GRID_ROWS][GRID_COLS];
-    GameState state;
-    int creator_id;             // Client ID of creator
-    int opponent_id;            // Client ID of opponent (-1 if none)
-    int current_turn;           // Client ID of whose turn it is
-    int winner_id;              // Client ID of winner (-1 if draw, 0 if ongoing)
-    int is_active;              // Whether game slot is in use
-    JoinRequest *join_requests; // Linked list of join requests
-    pthread_mutex_t game_mutex; // Per-game mutex
-} Game;
+#include "server.h"
 
 // ============================================================================
 // GLOBAL VARIABLES
@@ -223,7 +142,7 @@ int drop_piece(Game *game, int col, char piece) {
             return r;
         }
     }
-    return -1; // Column is full
+    return -1;
 }
 
 /**
@@ -245,7 +164,6 @@ int check_direction(Game *game, int row, int col, int dr, int dc, char piece) {
  * Check if a player has won
  */
 int check_winner(Game *game, char piece) {
-    // Check all positions for potential wins
     for (int r = 0; r < GRID_ROWS; r++) {
         for (int c = 0; c < GRID_COLS; c++) {
             // Horizontal
@@ -1360,133 +1278,4 @@ void handle_signal(int sig) {
     exit(0);
 }
 
-// ============================================================================
-// MAIN
-// ============================================================================
 
-int main(int argc, char *argv[]) {
-    struct sockaddr_in server_addr, client_addr;
-    socklen_t client_len = sizeof(client_addr);
-    int port = PORT;
-    
-    // Parse port argument
-    if (argc > 1) {
-        port = atoi(argv[1]);
-    }
-    
-    // Initialize client array
-    for (int i = 0; i < MAX_CLIENTS; i++) {
-        clients[i].is_connected = 0;
-        clients[i].socket = -1;
-        clients[i].current_game_id = -1;
-    }
-    
-    // Initialize games array
-    for (int i = 0; i < MAX_GAMES; i++) {
-        games[i].is_active = 0;
-    }
-    
-    // Setup signal handlers
-    signal(SIGINT, handle_signal);
-    signal(SIGTERM, handle_signal);
-    
-    // Create socket
-    server_socket = socket(AF_INET, SOCK_STREAM, 0);
-    if (server_socket < 0) {
-        perror("[SERVER] Socket creation error");
-        exit(EXIT_FAILURE);
-    }
-    
-    // Allow socket reuse
-    int opt = 1;
-    if (setsockopt(server_socket, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) < 0) {
-        perror("[SERVER] setsockopt error");
-        exit(EXIT_FAILURE);
-    }
-    
-    // Configure address
-    memset(&server_addr, 0, sizeof(server_addr));
-    server_addr.sin_family = AF_INET;
-    server_addr.sin_addr.s_addr = INADDR_ANY;
-    server_addr.sin_port = htons(port);
-    
-    // Bind
-    if (bind(server_socket, (struct sockaddr *)&server_addr, sizeof(server_addr)) < 0) {
-        perror("[SERVER] Binding error");
-        close(server_socket);
-        exit(EXIT_FAILURE);
-    }
-    
-    // Listen
-    if (listen(server_socket, MAX_CLIENTS) < 0) {
-        perror("[SERVER] Listen error");
-        close(server_socket);
-        exit(EXIT_FAILURE);
-    }
-    
-    printf("╔═══════════════════════════════════════════════════════════════╗\n");
-    printf("║           CONNECT 4 - MULTIPLAYER SERVER                      ║\n");
-    printf("╠═══════════════════════════════════════════════════════════════╣\n");
-    printf("║  Port: %-5d                                                  ║\n", port);
-    printf("║  Waiting for connections...                                   ║\n");
-    printf("╚═══════════════════════════════════════════════════════════════╝\n");
-    
-    // Accept loop
-    while (server_running) {
-        int client_socket = accept(server_socket, 
-                                   (struct sockaddr *)&client_addr, 
-                                   &client_len);
-        
-        if (client_socket < 0) {
-            if (server_running) {
-                perror("[SERVER] Accept error");
-            }
-            continue;
-        }
-        
-        // Find free client slot
-        pthread_mutex_lock(&clients_mutex);
-        
-        int slot = -1;
-        for (int i = 0; i < MAX_CLIENTS; i++) {
-            if (!clients[i].is_connected) {
-                slot = i;
-                break;
-            }
-        }
-        
-        if (slot < 0) {
-            pthread_mutex_unlock(&clients_mutex);
-            char *full_msg = "Server full. Try again later.\n";
-            send(client_socket, full_msg, strlen(full_msg), 0);
-            close(client_socket);
-            continue;
-        }
-        
-        // Initialize client
-        client_count++;
-        clients[slot].id = client_count;
-        clients[slot].socket = client_socket;
-        clients[slot].is_connected = 1;
-        clients[slot].current_game_id = -1;
-        clients[slot].address = client_addr;
-        strcpy(clients[slot].username, "");
-        
-        pthread_mutex_unlock(&clients_mutex);
-        
-        // Create handler thread
-        if (pthread_create(&clients[slot].thread, NULL, handle_client, &clients[slot]) != 0) {
-            perror("[SERVER] Thread creation error");
-            pthread_mutex_lock(&clients_mutex);
-            clients[slot].is_connected = 0;
-            close(client_socket);
-            pthread_mutex_unlock(&clients_mutex);
-            continue;
-        }
-        
-        pthread_detach(clients[slot].thread);
-    }
-    
-    close(server_socket);
-    return 0;
-}
