@@ -8,13 +8,14 @@
 
 #ifndef SERVER_UTILS_H
 #define SERVER_UTILS_H
-struct Client;
 
+// Forward declaration - full definition with typedef is in server.h
+struct Client;
 
 void send_to_client(int client_id, const char *message);
 void broadcast_except(int exclude_id, const char *message);
 void broadcast_all(const char *message);
-Client* get_client_by_id(int client_id);
+struct Client* get_client_by_id(int client_id);
 const char* get_username(int client_id);
 
 #endif

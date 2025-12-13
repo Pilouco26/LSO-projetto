@@ -19,12 +19,6 @@
 #include <signal.h>
 #include <errno.h>
 #include <time.h>
-#include "include/server_utils.h"
-#include "include/server_game_logic.h"
-#include "include/server_game_management.h"
-#include "include/server_handlers.h"
-
-#endif
 
 // ============================================================================
 // CONSTANTS
@@ -95,6 +89,15 @@ typedef struct Game {
 } Game;
 
 // ============================================================================
+// HEADER INCLUDES (after type definitions)
+// ============================================================================
+
+#include "include/server_utils.h"
+#include "include/server_game_logic.h"
+#include "include/server_game_management.h"
+#include "include/server_handlers.h"
+
+// ============================================================================
 // GLOBAL VARIABLES
 // ============================================================================
 
@@ -107,4 +110,5 @@ extern int game_count;
 extern pthread_mutex_t games_mutex;
 extern volatile int server_running;
 
+#endif
 

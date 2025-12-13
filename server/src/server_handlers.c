@@ -15,9 +15,9 @@
 void handle_help(Client *client) {
     char msg[BUFFER_SIZE];
     snprintf(msg, sizeof(msg),
-        "\n╔═══════════════════════════════════════════════════════════════╗\n"
+        "\n╔═════════════════════════════════════════════════════════════════╗\n"
         "║              CONNECT 4 - AVAILABLE COMMANDS                    ║\n"
-        "╠═══════════════════════════════════════════════════════════════╣\n"
+        "╠════════════════════════════════════════════════════════════════╣\n"
         "║  GENERAL:                                                      ║\n"
         "║    help              - Show this message                       ║\n"
         "║    list              - List available games                    ║\n"
@@ -36,7 +36,7 @@ void handle_help(Client *client) {
         "║    move <1-7>        - Drop piece in column 1-7                ║\n"
         "║    grid              - Show game grid                          ║\n"
         "║    rematch           - Propose/accept rematch                  ║\n"
-        "╚═══════════════════════════════════════════════════════════════╝\n\n");
+        "╚════════════════════════════════════════════════════════════════╝\n\n");
     send(client->socket, msg, strlen(msg), 0);
 }
 
@@ -48,7 +48,7 @@ void handle_list(Client *client) {
     
     written = snprintf(ptr, remaining,
         "\n╔═══════════════════════════════════════════════════════════════╗\n"
-        "║                      GAME LIST                                 ║\n"
+        "║                      GAME LIST                                ║\n"
         "╠═══════════════════════════════════════════════════════════════╣\n");
     ptr += written; remaining -= written;
     
@@ -78,7 +78,7 @@ void handle_list(Client *client) {
     
     if (!found) {
         written = snprintf(ptr, remaining,
-            "║              No games available                                ║\n");
+            "║              No games available                               ║\n");
         ptr += written; remaining -= written;
     }
     
@@ -399,13 +399,21 @@ void handle_move(Client *client, int column) {
             
             if (game->state == GAME_FINISHED) {
                 if (game->winner_id == client->id) {
+                    pthread_mutex_lock(&game->game_mutex);
+                    int old_creator = game->creator_id;
+                    int old_opponent = game->opponent_id;
+                    game->creator_id = game->winner_id;
+                    game->opponent_id = (old_creator == game->winner_id) ? old_opponent : old_creator;
+                    pthread_mutex_unlock(&game->game_mutex);
+                    
                     snprintf(msg, sizeof(msg),
                         "%s\n"
                         "╔═══════════════════════════════════════════════════════════════╗\n"
                         "║                      YOU WON! 🎉                               ║\n"
                         "╠═══════════════════════════════════════════════════════════════╣\n"
                         "║  Congratulations! You connected 4 pieces!                      ║\n"
-                        "║  Use 'rematch' to propose a rematch.                           ║\n"
+                        "║  You are now the game creator.                                  ║\n"
+                        "║  Use 'rematch' to propose a rematch to your opponent.           ║\n"
                         "╚═══════════════════════════════════════════════════════════════╝\n\n",
                         grid_msg);
                     send(client->socket, msg, strlen(msg), 0);
@@ -416,7 +424,9 @@ void handle_move(Client *client, int column) {
                         "║                      YOU LOST! 😢                              ║\n"
                         "╠═══════════════════════════════════════════════════════════════╣\n"
                         "║  %s connected 4 pieces.                                        \n"
-                        "║  Use 'rematch' to accept a rematch.                            ║\n"
+                        "║  You must leave the game.                                       ║\n"
+                        "║  You can only stay if the winner proposes a rematch.            ║\n"
+                        "║  Use 'leave' to exit the game.                                  ║\n"
                         "╚═══════════════════════════════════════════════════════════════╝\n\n",
                         grid_msg, client->username);
                     send_to_client(opponent_id, msg);
@@ -595,6 +605,16 @@ void handle_rematch(Client *client) {
         return;
     }
     
+    if (game->winner_id != -1) {
+        if (client->id != game->creator_id) {
+            snprintf(msg, sizeof(msg),
+                "\n[ERROR] Only the winner can propose a rematch.\n"
+                "        You must leave the game. Use 'leave' to exit.\n\n");
+            send(client->socket, msg, strlen(msg), 0);
+            return;
+        }
+    }
+    
     int opponent_id = (client->id == game->creator_id) ? game->opponent_id : game->creator_id;
     
     reset_game_for_rematch(client->current_game_id);
@@ -653,9 +673,9 @@ void *handle_client(void *arg) {
     
     char welcome[] = 
         "\n╔═══════════════════════════════════════════════════════════════╗\n"
-        "║           WELCOME TO CONNECT 4 SERVER!                         ║\n"
+        "║           WELCOME TO CONNECT 4 SERVER!                        ║\n"
         "╠═══════════════════════════════════════════════════════════════╣\n"
-        "║  Enter your username:                                          ║\n"
+        "║  Enter your username:                                         ║\n"
         "╚═══════════════════════════════════════════════════════════════╝\n\n"
         "Username: ";
     send(client->socket, welcome, strlen(welcome), 0);

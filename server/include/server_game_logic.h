@@ -8,14 +8,16 @@
 
 #ifndef SERVER_GAME_LOGIC_H
 #define SERVER_GAME_LOGIC_H
+
+// Forward declaration - full definition with typedef is in server.h
 struct Game;
 
-void init_grid(Game *game);
-void format_grid(Game *game, char *buffer, size_t size);
-int drop_piece(Game *game, int col, char piece);
-int check_direction(Game *game, int row, int col, int dr, int dc, char piece);
-int check_winner(Game *game, char piece);
-int is_grid_full(Game *game);
+void init_grid(struct Game *game);
+void format_grid(struct Game *game, char *buffer, size_t size);
+int drop_piece(struct Game *game, int col, char piece);
+int check_direction(struct Game *game, int row, int col, int dr, int dc, char piece);
+int check_winner(struct Game *game, char piece);
+int is_grid_full(struct Game *game);
 
 #endif 
 
