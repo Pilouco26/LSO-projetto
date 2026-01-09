@@ -1,5 +1,5 @@
 /**
- * LSO Project - Forza 4 (Connect 4) Multi-Client Server
+ * LSO Project - Forza 4 
  * 
  * Header file with declarations, constants, and data structures
  * Miguel Lopes Pereira - m.lopespereira@studenti.unina.it
