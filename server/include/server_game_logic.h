@@ -9,7 +9,6 @@
 #ifndef SERVER_GAME_LOGIC_H
 #define SERVER_GAME_LOGIC_H
 
-// Forward declaration - full definition with typedef is in server.h
 struct Game;
 
 void init_grid(struct Game *game);

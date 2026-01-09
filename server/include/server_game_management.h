@@ -9,7 +9,6 @@
 #ifndef SERVER_GAME_MANAGEMENT_H
 #define SERVER_GAME_MANAGEMENT_H
 
-// Forward declaration - full definition with typedef is in server.h
 struct Game;
 
 int create_game(int creator_id);

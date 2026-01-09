@@ -9,7 +9,6 @@
 #ifndef SERVER_HANDLERS_H
 #define SERVER_HANDLERS_H
 
-// Forward declaration - full definition with typedef is in server.h
 struct Client;
 
 void handle_help(struct Client *client);
