@@ -1,7 +1,6 @@
 /**
  * LSO Project - Forza 4 
  * 
- * Command handlers, client handler, and signal handler
  * Miguel Lopes Pereira - m.lopespereira@studenti.unina.it
  * Oriol Poblet Roca - o.pobletroca@studenti.unina.it
  */
@@ -9,6 +8,10 @@
 #ifndef SERVER_HANDLERS_H
 #define SERVER_HANDLERS_H
 
+<<<<<<< HEAD
+=======
+// Full definition in server.h
+>>>>>>> uri
 struct Client;
 
 void handle_help(struct Client *client);

@@ -1,16 +1,15 @@
 /**
  * LSO Project - Forza 4 
  * 
- * Game management functions
  * Miguel Lopes Pereira - m.lopespereira@studenti.unina.it
  * Oriol Poblet Roca - o.pobletroca@studenti.unina.it
  */
 
 #include "../server.h"
 
-// ============================================================================
+// =============================
 // GAME MANAGEMENT
-// ============================================================================
+// =============================
 
 /**
  * Create a new game
@@ -43,16 +42,15 @@ int create_game(int creator_id) {
     pthread_mutex_init(&game->game_mutex, NULL);
     
     game_count++;
-    
     pthread_mutex_unlock(&games_mutex);
-    
     pthread_mutex_lock(&clients_mutex);
     Client *creator = get_client_by_id(creator_id);
+
     if (creator) {
         creator->current_game_id = game_id;
     }
+
     pthread_mutex_unlock(&clients_mutex);
-    
     return game_id;
 }
 
@@ -98,13 +96,12 @@ int add_join_request(int game_id, int requester_id) {
     new_req->processed = 0;
     new_req->next = game->join_requests;
     game->join_requests = new_req;
-    
     pthread_mutex_unlock(&game->game_mutex);
     return 0;
 }
 
 /**
- * Process a join request (accept or reject)
+ * Process a join request
  */
 int process_join_request(int game_id, int requester_id, int accept) {
     Game *game = get_game_by_id(game_id);
@@ -121,32 +118,30 @@ int process_join_request(int game_id, int requester_id, int accept) {
     while (req) {
         if (req->requester_id == requester_id && req->processed == 0) {
             req->processed = accept ? 1 : -1;
-            
             if (accept) {
                 game->opponent_id = requester_id;
                 game->state = GAME_IN_PROGRESS;
                 game->current_turn = game->creator_id;
-                
                 pthread_mutex_lock(&clients_mutex);
                 Client *opponent = get_client_by_id(requester_id);
+
                 if (opponent) {
                     opponent->current_game_id = game_id;
                 }
+
                 pthread_mutex_unlock(&clients_mutex);
             }
-            
             pthread_mutex_unlock(&game->game_mutex);
             return 0;
         }
         req = req->next;
     }
-    
     pthread_mutex_unlock(&game->game_mutex);
     return -3;
 }
 
 /**
- * Make a move in the game
+ * Make a move
  */
 int make_move(int game_id, int player_id, int column) {
     Game *game = get_game_by_id(game_id);
@@ -181,13 +176,12 @@ int make_move(int game_id, int player_id, int column) {
     } else {
         game->current_turn = (player_id == game->creator_id) ? game->opponent_id : game->creator_id;
     }
-    
     pthread_mutex_unlock(&game->game_mutex);
     return 0;
 }
 
 /**
- * Clean up a finished game
+ * Clean a finished game
  */
 void cleanup_game(int game_id) {
     Game *game = get_game_by_id(game_id);
@@ -210,10 +204,8 @@ void cleanup_game(int game_id) {
         }
     }
     pthread_mutex_unlock(&clients_mutex);
-    
     game->is_active = 0;
     game_count--;
-    
     pthread_mutex_unlock(&game->game_mutex);
 }
 
@@ -225,12 +217,10 @@ void reset_game_for_rematch(int game_id) {
     if (!game) return;
     
     pthread_mutex_lock(&game->game_mutex);
-    
     init_grid(game);
     game->state = GAME_IN_PROGRESS;
     game->winner_id = 0;
     game->current_turn = (game->current_turn == game->creator_id) ? game->opponent_id : game->creator_id;
-    
     pthread_mutex_unlock(&game->game_mutex);
 }
 

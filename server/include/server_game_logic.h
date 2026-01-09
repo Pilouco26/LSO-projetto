@@ -1,7 +1,6 @@
 /**
  * LSO Project - Forza 4 
  * 
- * Connect 4 game logic functions
  * Miguel Lopes Pereira - m.lopespereira@studenti.unina.it
  * Oriol Poblet Roca - o.pobletroca@studenti.unina.it
  */
@@ -9,6 +8,10 @@
 #ifndef SERVER_GAME_LOGIC_H
 #define SERVER_GAME_LOGIC_H
 
+<<<<<<< HEAD
+=======
+// Full definition in server.h
+>>>>>>> uri
 struct Game;
 
 void init_grid(struct Game *game);

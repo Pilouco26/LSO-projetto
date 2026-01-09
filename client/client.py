@@ -12,9 +12,9 @@ import threading
 import time
 import os
 
-# ============================================================================
+# ============================================
 # CONFIGURATION
-# ============================================================================
+# ============================================
 
 DEFAULT_HOST = "server"
 DEFAULT_PORT = 8080
@@ -31,9 +31,9 @@ class Colors:
     CYAN = "\033[96m"
     WHITE = "\033[97m"
 
-# ============================================================================
+# ==============================================
 # TCP CLIENT CLASS
-# ============================================================================
+# ==============================================
 
 class Connect4Client:
     
@@ -154,7 +154,7 @@ class Connect4Client:
         receiver_thread.start()
         
         print(f"\n{Colors.GREEN}[CLIENT] Connected to {self.host}:{self.port}{Colors.RESET}")
-        print(f"{Colors.CYAN}Type /help for local guide or 'help' for game commands.{Colors.RESET}\n")
+        print(f"{Colors.CYAN}Type /help for local guide or 'help'.{Colors.RESET}\n")
         
         try:
             while self.connected and self.running:
@@ -200,9 +200,9 @@ class Connect4Client:
             print(f"\n{Colors.CYAN}[CLIENT] Disconnected.{Colors.RESET}")
 
 
-# ============================================================================
+# ================================
 # UTILITY FUNCTIONS
-# ============================================================================
+# ================================
 
 def wait_for_server(host: str, port: int, max_retries: int = 15, delay: float = 2.0) -> bool:
     print(f"{Colors.YELLOW}[CLIENT] Waiting for server {host}:{port}...{Colors.RESET}")
@@ -216,7 +216,7 @@ def wait_for_server(host: str, port: int, max_retries: int = 15, delay: float = 
             print(f"{Colors.GREEN}[CLIENT] Server available!{Colors.RESET}")
             return True
         except (socket.error, socket.timeout):
-            print(f"{Colors.YELLOW}[CLIENT] Attempt {attempt + 1}/{max_retries} - Retrying in {delay}s...{Colors.RESET}")
+            print(f"{Colors.YELLOW}[CLIENT] Attempt {attempt + 1}/{max_retries} - Retrying {delay}s...{Colors.RESET}")
             time.sleep(delay)
     
     print(f"{Colors.RED}[CLIENT] Server unreachable after {max_retries} attempts.{Colors.RESET}")
@@ -241,9 +241,9 @@ def print_banner():
     print(banner)
 
 
-# ============================================================================
+# ==========================
 # MAIN
-# ============================================================================
+# ==========================
 
 def main():
     host = sys.argv[1] if len(sys.argv) > 1 else os.environ.get('SERVER_HOST', DEFAULT_HOST)

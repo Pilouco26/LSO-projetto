@@ -1,7 +1,5 @@
 /**
  * LSO Project - Forza 4 
- * 
- * Header file with declarations, constants, and data structures
  * Miguel Lopes Pereira - m.lopespereira@studenti.unina.it
  * Oriol Poblet Roca - o.pobletroca@studenti.unina.it
  */
@@ -20,9 +18,9 @@
 #include <errno.h>
 #include <time.h>
 
-// ============================================================================
+// =======================
 // CONSTANTS
-// ============================================================================
+// ======================
 
 #define PORT 8080
 #define BUFFER_SIZE 4096
@@ -30,7 +28,7 @@
 #define MAX_GAMES 50
 #define MAX_USERNAME 32
 
-// Connect 4 grid dimensions
+// Grid dimensions
 #define GRID_ROWS 6
 #define GRID_COLS 7
 
@@ -38,6 +36,7 @@
 #define EMPTY '.'
 #define PLAYER1 'X'
 #define PLAYER2 'O'
+
 // Game states
 typedef enum {
     GAME_CREATED,       
@@ -46,11 +45,9 @@ typedef enum {
     GAME_FINISHED       
 } GameState;
 
-
-
-// ============================================================================
+// ======================
 // DATA STRUCTURES
-// ============================================================================
+// ======================
 
 // Forward declarations
 struct Game;
@@ -88,18 +85,18 @@ typedef struct Game {
     pthread_mutex_t game_mutex; 
 } Game;
 
-// ============================================================================
-// HEADER INCLUDES (after type definitions)
-// ============================================================================
+// ==========================
+// HEADER INCLUDES
+// ==========================
 
 #include "include/server_utils.h"
 #include "include/server_game_logic.h"
 #include "include/server_game_management.h"
 #include "include/server_handlers.h"
 
-// ============================================================================
+// ===========================
 // GLOBAL VARIABLES
-// ============================================================================
+// ===========================
 
 extern int server_socket;
 extern Client clients[MAX_CLIENTS];
@@ -111,4 +108,3 @@ extern pthread_mutex_t games_mutex;
 extern volatile int server_running;
 
 #endif
-

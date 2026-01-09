@@ -10,16 +10,16 @@ WORKDIR /app
 COPY client.py .
 COPY requirements.txt .
 
-# Install dependencies (if any)
+# Install dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Make the script executable
+# Chmod to execute
 RUN chmod +x client.py
 
-# Environment variables
+# Environment
 ENV SERVER_HOST=server
 ENV SERVER_PORT=8080
 ENV PYTHONUNBUFFERED=1
 
-# Run the client
+# Run client
 CMD ["python", "-u", "client.py"]

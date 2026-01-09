@@ -14,11 +14,11 @@ COPY server.c server.h ./
 COPY include/ include/
 COPY src/ src/
 
-# Compile the server with pthread support and optimizations
+# Compile the server
 RUN gcc -o server server.c src/server_utils.c src/server_game_logic.c src/server_game_management.c src/server_handlers.c -lpthread -Wall -Wextra -O2
 
-# Expose the server port
+# Expose server port
 EXPOSE 8080
 
-# Run the server
+# Run server
 CMD ["./server", "8080"]

@@ -1,16 +1,15 @@
 /**
  * LSO Project - Forza 4 
  * 
- * Command handlers, client handler, and signal handler
  * Miguel Lopes Pereira - m.lopespereira@studenti.unina.it
  * Oriol Poblet Roca - o.pobletroca@studenti.unina.it
  */
 
 #include "../server.h"
 
-// ============================================================================
+// =============================
 // COMMAND HANDLERS
-// ============================================================================
+// =============================
 
 void handle_help(Client *client) {
     char msg[BUFFER_SIZE];
@@ -65,10 +64,9 @@ void handle_list(Client *client) {
                 case GAME_FINISHED: state_str = "Finished"; break;
                 default: state_str = "Created"; break;
             }
-            
             const char *creator_name = get_username(games[i].creator_id);
             written = snprintf(ptr, remaining,
-                "║  Game #%-3d    | Creator: %-12s  | Status: %-12s ║\n",
+                "║  Game #%-3d  |  Creator: %-12s |  Status: %-12s  ║\n",
                 games[i].id, creator_name, state_str);
             ptr += written; remaining -= written;
         }
@@ -78,7 +76,7 @@ void handle_list(Client *client) {
     
     if (!found) {
         written = snprintf(ptr, remaining,
-            "║              No games available                               ║\n");
+            "║             No games available                                 ║\n");
         ptr += written; remaining -= written;
     }
     
@@ -94,7 +92,7 @@ void handle_status(Client *client) {
     if (client->current_game_id < 0) {
         snprintf(msg, sizeof(msg),
             "\n[STATUS] Username: %s | You are not in any game.\n"
-            "         Use 'create' to create a game or 'join <id>' to join one.\n\n",
+            "           Use 'create' to create a game or 'join <id>' to join one.\n\n",
             client->username);
     } else {
         Game *game = get_game_by_id(client->current_game_id);
@@ -108,7 +106,6 @@ void handle_status(Client *client) {
                 case GAME_FINISHED: state_str = "Finished"; break;
                 default: state_str = "Created"; break;
             }
-            
             snprintf(msg, sizeof(msg),
                 "\n[STATUS] Username: %s | Game #%d | %s\n\n",
                 client->username, client->current_game_id, state_str);
@@ -119,7 +116,6 @@ void handle_status(Client *client) {
                 client->username);
         }
     }
-    
     send(client->socket, msg, strlen(msg), 0);
 }
 
@@ -130,7 +126,7 @@ void handle_create(Client *client) {
         if (current && current->state != GAME_FINISHED) {
             snprintf(msg, sizeof(msg),
                 "\n[ERROR] You are already in an active game (Game #%d).\n"
-                "        Use 'leave' to leave before creating a new one.\n\n",
+                "           Use 'leave' to leave before creating a new one.\n\n",
                 client->current_game_id);
             send(client->socket, msg, strlen(msg), 0);
             return;
@@ -161,7 +157,6 @@ void handle_create(Client *client) {
             client->username, game_id, game_id);
         broadcast_except(client->id, broadcast_msg);
     }
-    
     send(client->socket, msg, strlen(msg), 0);
 }
 
@@ -192,7 +187,7 @@ void handle_join(Client *client, int game_id) {
                 char notify[BUFFER_SIZE];
                 snprintf(notify, sizeof(notify),
                     "\n[REQUEST] %s wants to join your game #%d!\n"
-                    "          Use 'accept %s' or 'reject %s'\n\n",
+                    "           Use 'accept %s' or 'reject %s'\n\n",
                     client->username, game_id, client->username, client->username);
                 send_to_client(game->creator_id, notify);
             }
@@ -217,7 +212,6 @@ void handle_join(Client *client, int game_id) {
             snprintf(msg, sizeof(msg),
                 "\n[ERROR] Unknown error.\n\n");
     }
-    
     send(client->socket, msg, strlen(msg), 0);
 }
 
@@ -240,11 +234,9 @@ void handle_requests(Client *client) {
     }
     
     pthread_mutex_lock(&game->game_mutex);
-    
     char *ptr = msg;
     int remaining = sizeof(msg);
     int written;
-    
     written = snprintf(ptr, remaining,
         "\n╔═══════════════════════════════════════════════════════════════╗\n"
         "║                    JOIN REQUESTS                               ║\n"
@@ -272,7 +264,6 @@ void handle_requests(Client *client) {
     }
     
     pthread_mutex_unlock(&game->game_mutex);
-    
     snprintf(ptr, remaining,
         "╚═══════════════════════════════════════════════════════════════╝\n\n");
     
@@ -430,7 +421,6 @@ void handle_move(Client *client, int column) {
                         "╚═══════════════════════════════════════════════════════════════╝\n\n",
                         grid_msg, client->username);
                     send_to_client(opponent_id, msg);
-                    
                 } else if (game->winner_id == -1) {
                     snprintf(msg, sizeof(msg),
                         "%s\n"
@@ -457,7 +447,6 @@ void handle_move(Client *client, int column) {
                         game->id, get_username(game->winner_id));
                 }
                 broadcast_except(client->id, broadcast_msg);
-                
             } else {
                 snprintf(msg, sizeof(msg),
                     "%s\n[OK] Move made in column %d. Wait for opponent's turn...\n\n",
@@ -547,7 +536,6 @@ void handle_leave(Client *client) {
     
     int game_id = client->current_game_id;
     int opponent_id = -1;
-    
     pthread_mutex_lock(&game->game_mutex);
     
     if (game->state == GAME_IN_PROGRESS) {
@@ -557,9 +545,7 @@ void handle_leave(Client *client) {
     }
     
     pthread_mutex_unlock(&game->game_mutex);
-    
     client->current_game_id = -1;
-    
     snprintf(msg, sizeof(msg),
         "\n[OK] You left game #%d.\n\n", game_id);
     send(client->socket, msg, strlen(msg), 0);
@@ -574,7 +560,6 @@ void handle_leave(Client *client) {
             "╚═══════════════════════════════════════════════════════════════╝\n\n",
             client->username);
         send_to_client(opponent_id, msg);
-        
         char broadcast_msg[BUFFER_SIZE];
         snprintf(broadcast_msg, sizeof(broadcast_msg),
             "\n[NOTICE] Game #%d is over. %s left.\n\n",
@@ -609,16 +594,14 @@ void handle_rematch(Client *client) {
         if (client->id != game->creator_id) {
             snprintf(msg, sizeof(msg),
                 "\n[ERROR] Only the winner can propose a rematch.\n"
-                "        You must leave the game. Use 'leave' to exit.\n\n");
+                "           You must leave the game. Use 'leave' to exit.\n\n");
             send(client->socket, msg, strlen(msg), 0);
             return;
         }
     }
     
     int opponent_id = (client->id == game->creator_id) ? game->opponent_id : game->creator_id;
-    
     reset_game_for_rematch(client->current_game_id);
-    
     const char *first_player = get_username(game->current_turn);
     char your_symbol = (client->id == game->creator_id) ? PLAYER1 : PLAYER2;
     char opp_symbol = (client->id == game->creator_id) ? PLAYER2 : PLAYER1;
@@ -657,9 +640,9 @@ void handle_rematch(Client *client) {
     broadcast_except(client->id, broadcast_msg);
 }
 
-// ============================================================================
+// ===========================
 // CLIENT HANDLER
-// ============================================================================
+// ===========================
 
 void *handle_client(void *arg) {
     Client *client = (Client *)arg;
@@ -715,11 +698,9 @@ void *handle_client(void *arg) {
         if (newline) *newline = '\0';
         newline = strchr(buffer, '\r');
         if (newline) *newline = '\0';
-        
         if (strlen(buffer) == 0) continue;
         
         printf("[SERVER] %s: %s\n", client->username, buffer);
-        
         char cmd[64];
         char arg[64];
         int num_arg;
@@ -798,7 +779,6 @@ void *handle_client(void *arg) {
     
 cleanup:
     printf("[SERVER] Client '%s' (#%d) disconnected\n", client->username, client->id);
-    
     if (client->current_game_id >= 0) {
         handle_leave(client);
     }
@@ -815,13 +795,12 @@ cleanup:
     client->is_connected = 0;
     client->socket = -1;
     pthread_mutex_unlock(&clients_mutex);
-    
     return NULL;
 }
 
-// ============================================================================
+// ===========================
 // SIGNAL HANDLER
-// ============================================================================
+// ===========================
 
 void handle_signal(int sig) {
     printf("\n[SERVER] Server shutting down...\n");

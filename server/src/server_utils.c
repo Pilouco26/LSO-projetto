@@ -1,19 +1,18 @@
 /**
  * LSO Project - Forza 4 
  * 
- * Utility functions for client communication and management
  * Miguel Lopes Pereira - m.lopespereira@studenti.unina.it
  * Oriol Poblet Roca - o.pobletroca@studenti.unina.it
  */
 
 #include "../server.h"
 
-// ============================================================================
+// ===============================
 // UTILITY FUNCTIONS
-// ============================================================================
+// ===============================
 
 /**
- * Send a message to a specific client
+ * Send a message to a client
  */
 void send_to_client(int client_id, const char *message) {
     pthread_mutex_lock(&clients_mutex);
