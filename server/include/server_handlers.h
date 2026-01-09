@@ -8,10 +8,7 @@
 #ifndef SERVER_HANDLERS_H
 #define SERVER_HANDLERS_H
 
-<<<<<<< HEAD
-=======
 // Full definition in server.h
->>>>>>> uri
 struct Client;
 
 void handle_help(struct Client *client);
