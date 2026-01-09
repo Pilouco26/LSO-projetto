@@ -1,5 +1,5 @@
 /**
- * LSO Project - Forza 4 (Connect 4) Multi-Client Server
+ * LSO Project - Forza 4 
  * 
  * Connect 4 game logic functions
  * Miguel Lopes Pereira - m.lopespereira@studenti.unina.it

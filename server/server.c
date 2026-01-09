@@ -1,7 +1,6 @@
 /**
  * LSO Project - Forza 4 (Connect 4) Multi-Client Server
  * 
- * A multi-threaded server for playing Connect 4.
  * Miguel Lopes Pereira - m.lopespereira@studenti.unina.it
  * Oriol Poblet Roca - o.pobletroca@studenti.unina.it
  */
@@ -77,7 +76,7 @@ int main(int argc, char *argv[]) {
     printf("╔═══════════════════════════════════════════════════════════════╗\n");
     printf("║           CONNECT 4 - MULTIPLAYER SERVER                      ║\n");
     printf("╠═══════════════════════════════════════════════════════════════╣\n");
-    printf("║  Port: %-5d                                                  ║\n", port);
+    printf("║  Port: %-5d                                                   ║\n", port);
     printf("║  Waiting for connections...                                   ║\n");
     printf("╚═══════════════════════════════════════════════════════════════╝\n");
     

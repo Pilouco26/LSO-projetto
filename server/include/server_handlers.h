@@ -1,5 +1,5 @@
 /**
- * LSO Project - Forza 4 (Connect 4) Multi-Client Server
+ * LSO Project - Forza 4 
  * 
  * Command handlers, client handler, and signal handler
  * Miguel Lopes Pereira - m.lopespereira@studenti.unina.it

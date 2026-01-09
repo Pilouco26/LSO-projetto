@@ -1,8 +1,7 @@
 # LSO Project - Forza 4 Docker Compose Configuration
-# Multi-client game server architecture
 services:
   # ==========================================================================
-  # C Server - Multi-threaded Forza 4 game server
+  # C Server 
   # ==========================================================================
   server:
     build:
@@ -23,7 +22,7 @@ services:
       start_period: 10s
 
   # ==========================================================================
-  # Python Client - Interactive game client
+  # Python Client 
   # ==========================================================================
   client:
     build:
