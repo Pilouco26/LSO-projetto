@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 """
 LSO Project - Connect 4 Python Client
-
 Miguel Lopes Pereira - m.lopespereira@studenti.unina.it
 Oriol Poblet Roca - o.pobletroca@studenti.unina.it
 """
