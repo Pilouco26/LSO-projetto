@@ -13,7 +13,6 @@ int client_count = 0;
 pthread_mutex_t clients_mutex = PTHREAD_MUTEX_INITIALIZER;
 
 Game games[MAX_GAMES];
-int game_count = 0;
 pthread_mutex_t games_mutex = PTHREAD_MUTEX_INITIALIZER;
 
 volatile int server_running = 1;

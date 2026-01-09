@@ -103,7 +103,6 @@ extern Client clients[MAX_CLIENTS];
 extern int client_count;
 extern pthread_mutex_t clients_mutex;
 extern Game games[MAX_GAMES];
-extern int game_count;
 extern pthread_mutex_t games_mutex;
 extern volatile int server_running;
 

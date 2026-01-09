@@ -23,7 +23,6 @@ int create_game(int creator_id) {
             break;
         }
     }
-    
     if (game_id == -1) {
         pthread_mutex_unlock(&games_mutex);
         return -1;
@@ -38,18 +37,15 @@ int create_game(int creator_id) {
     game->winner_id = 0;
     game->is_active = 1;
     game->join_requests = NULL;
+    pthread_mutex_unlock(&games_mutex);
     init_grid(game);
     pthread_mutex_init(&game->game_mutex, NULL);
     
-    game_count++;
-    pthread_mutex_unlock(&games_mutex);
     pthread_mutex_lock(&clients_mutex);
     Client *creator = get_client_by_id(creator_id);
-
     if (creator) {
         creator->current_game_id = game_id;
     }
-
     pthread_mutex_unlock(&clients_mutex);
     return game_id;
 }
@@ -205,7 +201,6 @@ void cleanup_game(int game_id) {
     }
     pthread_mutex_unlock(&clients_mutex);
     game->is_active = 0;
-    game_count--;
     pthread_mutex_unlock(&game->game_mutex);
 }
 
