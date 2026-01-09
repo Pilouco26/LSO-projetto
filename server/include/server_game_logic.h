@@ -8,10 +8,7 @@
 #ifndef SERVER_GAME_LOGIC_H
 #define SERVER_GAME_LOGIC_H
 
-<<<<<<< HEAD
-=======
 // Full definition in server.h
->>>>>>> uri
 struct Game;
 
 void init_grid(struct Game *game);
