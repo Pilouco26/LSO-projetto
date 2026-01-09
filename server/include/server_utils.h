@@ -1,7 +1,6 @@
 /**
  * LSO Project - Forza 4 (Connect 4) Multi-Client Server
  * 
- * Utility functions for client communication and management
  * Miguel Lopes Pereira - m.lopespereira@studenti.unina.it
  * Oriol Poblet Roca - o.pobletroca@studenti.unina.it
  */
@@ -9,6 +8,10 @@
 #ifndef SERVER_UTILS_H
 #define SERVER_UTILS_H
 
+<<<<<<< HEAD
+=======
+// Full definition in server.h
+>>>>>>> uri
 struct Client;
 
 void send_to_client(int client_id, const char *message);

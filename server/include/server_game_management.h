@@ -1,7 +1,6 @@
 /**
  * LSO Project - Forza 4 (Connect 4) Multi-Client Server
  * 
- * Game management functions
  * Miguel Lopes Pereira - m.lopespereira@studenti.unina.it
  * Oriol Poblet Roca - o.pobletroca@studenti.unina.it
  */
@@ -9,6 +8,10 @@
 #ifndef SERVER_GAME_MANAGEMENT_H
 #define SERVER_GAME_MANAGEMENT_H
 
+<<<<<<< HEAD
+=======
+// Full definition in server.h
+>>>>>>> uri
 struct Game;
 
 int create_game(int creator_id);
