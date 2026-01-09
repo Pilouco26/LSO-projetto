@@ -2,7 +2,6 @@
 """
 LSO Project - Connect 4 Python Client
 
-A multi-threaded TCP client for playing Connect 4.
 Miguel Lopes Pereira - m.lopespereira@studenti.unina.it
 Oriol Poblet Roca - o.pobletroca@studenti.unina.it
 """
