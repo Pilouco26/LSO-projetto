@@ -1,19 +1,18 @@
 /**
  * LSO Project - Forza 4 (Connect 4) Multi-Client Server
  * 
- * Connect 4 game logic functions
  * Miguel Lopes Pereira - m.lopespereira@studenti.unina.it
  * Oriol Poblet Roca - o.pobletroca@studenti.unina.it
  */
 
 #include "../server.h"
 
-// ============================================================================
+// ==============================
 // CONNECT 4 GAME LOGIC
-// ============================================================================
+// ==============================
 
 /**
- * Initialize the game grid
+ * Initialize the grid
  */
 void init_grid(Game *game) {
     for (int r = 0; r < GRID_ROWS; r++) {
@@ -24,7 +23,7 @@ void init_grid(Game *game) {
 }
 
 /**
- * Format the grid as a string for display
+ * Format the grid to string
  */
 void format_grid(Game *game, char *buffer, size_t size) {
     char *ptr = buffer;
@@ -33,29 +32,25 @@ void format_grid(Game *game, char *buffer, size_t size) {
     
     written = snprintf(ptr, remaining, "\n  1 2 3 4 5 6 7\n");
     ptr += written; remaining -= written;
-    
     written = snprintf(ptr, remaining, " +---------------+\n");
     ptr += written; remaining -= written;
     
     for (int r = 0; r < GRID_ROWS; r++) {
         written = snprintf(ptr, remaining, " | ");
         ptr += written; remaining -= written;
-        
         for (int c = 0; c < GRID_COLS; c++) {
             written = snprintf(ptr, remaining, "%c ", game->grid[r][c]);
             ptr += written; remaining -= written;
         }
-        
         written = snprintf(ptr, remaining, "|\n");
         ptr += written; remaining -= written;
     }
-    
     written = snprintf(ptr, remaining, " +---------------+\n");
 }
 
 /**
  * Drop a piece in a column
- * Returns the row where the piece landed, or -1 if column is full
+ * Returns the row where piece is dropped
  */
 int drop_piece(Game *game, int col, char piece) {
     if (col < 0 || col >= GRID_COLS) return -1;
@@ -70,7 +65,7 @@ int drop_piece(Game *game, int col, char piece) {
 }
 
 /**
- * Check for a win starting from a position in a direction
+ * Check for a win in a direction
  */
 int check_direction(Game *game, int row, int col, int dr, int dc, char piece) {
     int count = 0;
@@ -100,7 +95,7 @@ int check_winner(Game *game, char piece) {
 }
 
 /**
- * Check if the grid is full (draw)
+ * Check if the grid is full (in draw case)
  */
 int is_grid_full(Game *game) {
     for (int c = 0; c < GRID_COLS; c++) {

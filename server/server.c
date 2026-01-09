@@ -1,7 +1,6 @@
 /**
  * LSO Project - Forza 4 (Connect 4) Multi-Client Server
  * 
- * A multi-threaded server for playing Connect 4.
  * Miguel Lopes Pereira - m.lopespereira@studenti.unina.it
  * Oriol Poblet Roca - o.pobletroca@studenti.unina.it
  */
@@ -20,9 +19,10 @@ pthread_mutex_t games_mutex = PTHREAD_MUTEX_INITIALIZER;
 volatile int server_running = 1;
 
 
-// ============================================================================
+// =========================
 // GAME
-// ============================================================================
+// ==========================
+
 int main(int argc, char *argv[]) {
     struct sockaddr_in server_addr, client_addr;
     socklen_t client_len = sizeof(client_addr);
@@ -44,7 +44,6 @@ int main(int argc, char *argv[]) {
     
     signal(SIGINT, handle_signal);
     signal(SIGTERM, handle_signal);
-    
     server_socket = socket(AF_INET, SOCK_STREAM, 0);
     if (server_socket < 0) {
         perror("[SERVER] Socket creation error");
@@ -94,7 +93,6 @@ int main(int argc, char *argv[]) {
         }
         
         pthread_mutex_lock(&clients_mutex);
-        
         int slot = -1;
         for (int i = 0; i < MAX_CLIENTS; i++) {
             if (!clients[i].is_connected) {
@@ -118,7 +116,6 @@ int main(int argc, char *argv[]) {
         clients[slot].current_game_id = -1;
         clients[slot].address = client_addr;
         strcpy(clients[slot].username, "");
-        
         pthread_mutex_unlock(&clients_mutex);
 
         if (pthread_create(&clients[slot].thread, NULL, handle_client, &clients[slot]) != 0) {
@@ -129,10 +126,8 @@ int main(int argc, char *argv[]) {
             pthread_mutex_unlock(&clients_mutex);
             continue;
         }
-        
         pthread_detach(clients[slot].thread);
     }
-    
     close(server_socket);
     return 0;
 }
