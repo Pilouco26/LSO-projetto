@@ -127,25 +127,6 @@ class Connect4Client:
             print(f"{Colors.RED}[ERROR] Send failed: {e}{Colors.RESET}")
             return False
     
-    def show_local_help(self):
-        help_text = f"""
-{Colors.CYAN}╔═══════════════════════════════════════════════════════════════╗
-║                    CLIENT QUICK GUIDE                          ║
-╠═══════════════════════════════════════════════════════════════╣
-║  Connection:                                                   ║
-║    - Connected to: {self.host}:{self.port}                            
-║    - Username: {self.username or 'Not set'}                                  
-║                                                                ║
-║  Local commands:                                               ║
-║    /help     - Show this guide                                 ║
-║    /clear    - Clear screen                                    ║
-║    /quit     - Disconnect (same as 'quit')                     ║
-║                                                                ║
-║  Type 'help' for server commands                               ║
-╚═══════════════════════════════════════════════════════════════╝{Colors.RESET}
-"""
-        print(help_text)
-    
     def run_interactive(self):
         if not self.connect():
             return
@@ -154,7 +135,7 @@ class Connect4Client:
         receiver_thread.start()
         
         print(f"\n{Colors.GREEN}[CLIENT] Connected to {self.host}:{self.port}{Colors.RESET}")
-        print(f"{Colors.CYAN}Type /help for local guide or 'help'.{Colors.RESET}\n")
+        print(f"{Colors.CYAN}Type 'help' to see available commands.{Colors.RESET}\n")
         
         try:
             while self.connected and self.running:
@@ -167,16 +148,14 @@ class Connect4Client:
                     if user_input.startswith('/'):
                         cmd = user_input[1:].lower().strip()
                         
-                        if cmd == 'help':
-                            self.show_local_help()
-                        elif cmd == 'clear':
+                        if cmd == 'clear':
                             os.system('cls' if os.name == 'nt' else 'clear')
                         elif cmd == 'quit' or cmd == 'exit':
                             self.send_message('quit')
                             time.sleep(0.3)
                             break
                         else:
-                            print(f"{Colors.YELLOW}Unknown local command. Use /help{Colors.RESET}")
+                            print(f"{Colors.YELLOW}Unknown local command.{Colors.RESET}")
                         continue
                     
                     if user_input.lower() in ['quit', 'exit']:

@@ -113,7 +113,11 @@ int process_join_request(int game_id, int requester_id, int accept) {
     JoinRequest *req = game->join_requests;
     while (req) {
         if (req->requester_id == requester_id && req->processed == 0) {
-            req->processed = accept ? 1 : -1;
+            if (accept) {
+                req->processed = 1; 
+            } else {
+                req->processed = -1; 
+            }
             if (accept) {
                 game->opponent_id = requester_id;
                 game->state = GAME_IN_PROGRESS;
